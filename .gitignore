@@ -1,0 +1,32 @@
+# Environment
+.env
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local database
+*.db
+chatconnect.db
+
+# Temporary files
+_tmp_users.txt
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
