@@ -1,41 +1,10 @@
 services:
-
   backend:
     build: .
     container_name: chatconnect-backend
-
     ports:
       - "8000:8000"
-
     environment:
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_HOST: mysql
-      MYSQL_DB: chatconnect
-
-    depends_on:
-      mysql:
-        condition: service_healthy
-
-  mysql:
-    image: mysql:8.0
-    container_name: chatconnect-mysql
-
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: chatconnect
-
-    ports:
-      - "3306:3306"
-
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-volumes:
-  mysql_data:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:[YOUR-PASSWORD]@db.ahchzeygwalxoularnyn.supabase.co:5432/postgres}
+    env_file:
+      - .env

@@ -8,46 +8,49 @@ import app.models  # Import models to register them with Base
 from sqlalchemy import inspect, text
 
 # Create tables automatically
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
 
-def _ensure_columns():
-    """Add columns introduced after the first schema version."""
-    inspector = inspect(engine)
-    dialect = engine.dialect.name
-    table_columns = {
-        table: {col["name"] for col in inspector.get_columns(table)}
-        for table in inspector.get_table_names()
-    }
-    alterations = []
-    if "users" in table_columns:
-        if "public_key" not in table_columns["users"]:
-            alterations.append("ALTER TABLE users ADD COLUMN public_key TEXT")
-        if "encrypted_private_key" not in table_columns["users"]:
-            alterations.append("ALTER TABLE users ADD COLUMN encrypted_private_key TEXT")
-    if "messages" in table_columns:
-        cols = table_columns["messages"]
-        if "message_type" not in cols:
-            alterations.append("ALTER TABLE messages ADD COLUMN message_type VARCHAR(20) DEFAULT 'text' NOT NULL")
-        if "file_url" not in cols:
-            alterations.append("ALTER TABLE messages ADD COLUMN file_url VARCHAR(500)")
-        if "file_name" not in cols:
-            alterations.append("ALTER TABLE messages ADD COLUMN file_name VARCHAR(255)")
-        if "file_size" not in cols:
-            alterations.append("ALTER TABLE messages ADD COLUMN file_size INTEGER")
-        if "is_encrypted" not in cols:
-            default_false = "0" if dialect == "sqlite" else "0"
-            alterations.append(
-                f"ALTER TABLE messages ADD COLUMN is_encrypted BOOLEAN DEFAULT {default_false} NOT NULL"
-            )
-    if alterations:
-        with engine.begin() as conn:
-            for stmt in alterations:
-                try:
-                    conn.execute(text(stmt))
-                except Exception as e:
-                    print(f"Migration notice: {e}")
+    def _ensure_columns():
+        """Add columns introduced after the first schema version."""
+        inspector = inspect(engine)
+        dialect = engine.dialect.name
+        table_columns = {
+            table: {col["name"] for col in inspector.get_columns(table)}
+            for table in inspector.get_table_names()
+        }
+        alterations = []
+        if "users" in table_columns:
+            if "public_key" not in table_columns["users"]:
+                alterations.append("ALTER TABLE users ADD COLUMN public_key TEXT")
+            if "encrypted_private_key" not in table_columns["users"]:
+                alterations.append("ALTER TABLE users ADD COLUMN encrypted_private_key TEXT")
+        if "messages" in table_columns:
+            cols = table_columns["messages"]
+            if "message_type" not in cols:
+                alterations.append("ALTER TABLE messages ADD COLUMN message_type VARCHAR(20) DEFAULT 'text' NOT NULL")
+            if "file_url" not in cols:
+                alterations.append("ALTER TABLE messages ADD COLUMN file_url VARCHAR(500)")
+            if "file_name" not in cols:
+                alterations.append("ALTER TABLE messages ADD COLUMN file_name VARCHAR(255)")
+            if "file_size" not in cols:
+                alterations.append("ALTER TABLE messages ADD COLUMN file_size INTEGER")
+            if "is_encrypted" not in cols:
+                default_false = "FALSE" if dialect == "postgresql" else "0"
+                alterations.append(
+                    f"ALTER TABLE messages ADD COLUMN is_encrypted BOOLEAN DEFAULT {default_false} NOT NULL"
+                )
+        if alterations:
+            with engine.begin() as conn:
+                for stmt in alterations:
+                    try:
+                        conn.execute(text(stmt))
+                    except Exception as e:
+                        print(f"Migration notice: {e}")
 
-_ensure_columns()
+    _ensure_columns()
+except Exception as e:
+    print(f"[Database] Schema initialization warning: {e}")
 
 from fastapi.staticfiles import StaticFiles
 import os
