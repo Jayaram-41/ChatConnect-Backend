@@ -1,12 +1,15 @@
 import os
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    # Ensure .env is loaded from the backend directory regardless of cwd
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    load_dotenv(os.path.join(base_dir, ".env"))
+    load_dotenv()
+except ImportError:
+    pass
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-
-# Ensure .env is loaded from the backend directory regardless of cwd
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-load_dotenv(os.path.join(base_dir, ".env"))
-load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
