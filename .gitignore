@@ -1,32 +1,32 @@
-# Environment
-.env
+name: ChatConnect Frontend CI
 
-# Python
-venv/
-.venv/
-__pycache__/
-*.py[cod]
+on:
+  push:
+    branches:
+      - main
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
+  pull_request:
+    branches:
+      - main
 
-# Local database
-*.db
-chatconnect.db
+jobs:
+  build:
+    name: Angular Build
+    runs-on: ubuntu-latest
 
-# Temporary files
-_tmp_users.txt
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-# Uploads
-uploads/*
-!uploads/.gitkeep
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-# IDE
-.vscode/
-.idea/
+      - name: Install dependencies
+        run: npm ci
 
-# OS
-.DS_Store
-Thumbs.db
+      - name: Build Angular application
+        run: npm run build
